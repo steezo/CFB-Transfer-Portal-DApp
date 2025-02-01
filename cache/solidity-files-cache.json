@@ -1,0 +1,41 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/jedinupe/Sites/web3/CFB-Transfer-Portal-DApp/contracts/AthleteRegistry.sol": {
+      "lastModificationDate": 1738104265878,
+      "contentHash": "098ca3aac8b3bb9e4ce27d7e23127dde",
+      "sourceName": "contracts/AthleteRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.28",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "AthleteRegistry"
+      ]
+    }
+  }
+}
