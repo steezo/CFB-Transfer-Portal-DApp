@@ -2,6 +2,8 @@
 pragma solidity ^0.8.0;
 
 contract TransferPortal {
+
+// Options for the athlete's year.
     enum athleteYear {
         Freshman,
         Sophomore,
@@ -9,14 +11,16 @@ contract TransferPortal {
         Senior
     }
 
+    // Options for the athlete's status.
     enum athleteStatus{
-        Available,
-        Returning,
-        Paused,
-        Evalulating,
-        Committed
+        Available, // Athlete is available to recieve offers.
+        Returning,  // Athlete is returning to the original college.
+        Paused, // Athlete is taking a break.
+        Evalulating, // Athlete has closed availability and evaluating offers.
+        Committed // Athlete has accepted an offer and is no longer available to receive offers.
     }
 
+    // Details of an offer from a college.
     struct Offer {
         uint256 amount;
         uint256 expiration;
@@ -24,19 +28,24 @@ contract TransferPortal {
         string feedback;
     }
 
+    // Details about the college that is already registered.
     struct College {
         address collegeAddress;
         string name;
         string historyData;
         string programStrengths;
         string alumniSuccess;
+        string coachingStaff;
     }
 
+    // Details about the athlete that is already registered.
     struct Athlete {
         athleteYear year;  // using enum to represent year
         athleteStatus status; // using enum to represent status
         address athleteAddress;
         bool available;
+
+        // Mapping of college addresses to offers.
         mapping(address => Offer) offers;
         address[] colleges;
         string athleteName;
@@ -45,12 +54,15 @@ contract TransferPortal {
         string position;
     }
 
+    // Mapping of addresses to athletes and colleges.
     mapping(address => Athlete) public athletes;
     mapping(address => College) public colleges;
+
+    // Arrays of athlete and college addresses.
     address[] public athleteList;
     address[] public collegeList;
 
-    // Events
+    // Events for logging actions.
     event AthleteRegistered(address athlete);
     event CollegeRegistered(address college);
     event OfferMade(address college, address athlete, uint256 amount);
@@ -68,6 +80,7 @@ contract TransferPortal {
         emit AthleteRegistered(msg.sender);
     }
 
+    // Function for athlete to view the offers from colleges.
     function viewOffers() public view returns (address[] memory, Offer[] memory) {
         Athlete storage athlete = athletes[msg.sender];
         uint256 count = athlete.colleges.length;
@@ -80,6 +93,7 @@ contract TransferPortal {
         return (athlete.colleges, offerList);
     }
 
+    // Function for athlete to accept an offer from a college.  The Offer must be active and not expired.
     function acceptOffer(address collegeAddr) public {
         Athlete storage athlete = athletes[msg.sender];
         Offer storage offer = athlete.offers[collegeAddr];
@@ -94,15 +108,17 @@ contract TransferPortal {
         athlete.available = false;
         offer.active = false;
 
+        // Emit event noting that the offer was accepted.
         emit OfferAccepted(msg.sender, collegeAddr, offer.amount);
     }
 
-    // College functions
+    // College registration function.
     function registerCollege(
         string memory name,
         string memory historyData,
         string memory programStrengths,
-        string memory alumniSuccess
+        string memory alumniSuccess,
+        string memory coachingStaff
     ) public {
         College storage college = colleges[msg.sender];
         require(bytes(college.name).length == 0, "College already registered.");
@@ -111,10 +127,12 @@ contract TransferPortal {
         college.historyData = historyData;
         college.programStrengths = programStrengths;
         college.alumniSuccess = alumniSuccess;
+        college.coachingStaff = coachingStaff;
         collegeList.push(msg.sender);
         emit CollegeRegistered(msg.sender);
     }
 
+    // Function for a college to make an offer to the athlete.
     function makeOffer(
         address athleteAddr,
         uint256 amount,
@@ -133,6 +151,7 @@ contract TransferPortal {
         emit OfferMade(msg.sender, athleteAddr, amount);
     }
 
+    // Function for a college to modify an offer to an athlete.
     function modifyOffer(
         address athleteAddr,
         uint256 newAmount,
@@ -143,13 +162,14 @@ contract TransferPortal {
         Offer storage offer = athlete.offers[msg.sender];
         require(offer.active, "Offer is not active.");
 
-        // Adjust the amount
+        // Colleges can Aajust the amount.
         if (newAmount > offer.amount) {
             require(msg.value == newAmount - offer.amount, "Additional funds required.");
         } else if (newAmount < offer.amount) {
             payable(msg.sender).transfer(offer.amount - newAmount);
         }
 
+        // Update fields for the offer.
         offer.amount = newAmount;
         offer.expiration = newExpiration;
         offer.feedback = feedback;
